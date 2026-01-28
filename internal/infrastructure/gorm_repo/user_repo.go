@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Abdulqudri/fintech/internal/domain/user"
+	"github.com/Abdulqudri/fintech/internal/infrastructure/db"
 	"github.com/Abdulqudri/fintech/internal/infrastructure/models"
 	uuid "github.com/google/uuid"
 	"gorm.io/gorm"
@@ -18,11 +19,9 @@ func NewRepository(db *gorm.DB) *UserRepository {
 }
 
 func (r *UserRepository) Create(ctx context.Context, u *user.User, hash string) error {
-	id := uuid.New()
-
 
 	model := models.User{
-		ID:       id,
+		ID:       u.ID,
 		FullName: u.FullName,
 		Email:    u.Email,
 		Password: hash,
@@ -30,6 +29,19 @@ func (r *UserRepository) Create(ctx context.Context, u *user.User, hash string) 
 	}
 
 	return r.db.WithContext(ctx).Create(&model).Error
+}
+
+func (r *UserRepository) CreateTx(ctx context.Context, tx db.Tx, u *user.User, hash string) error {
+
+	model := models.User{
+		ID:       u.ID,
+		FullName: u.FullName,
+		Email:    u.Email,
+		Password: hash,
+		Status:   string(u.Status),
+	}
+
+	return tx.DB().WithContext(ctx).Create(&model).Error
 }
 
 func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*user.User, error) {
