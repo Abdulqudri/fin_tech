@@ -10,6 +10,7 @@ import (
 type Config struct {
 	DbURL  string
 	Port      string
+	JwtSecret string
 }
 
 func Load() (*Config, error) {
@@ -25,9 +26,11 @@ func Load() (*Config, error) {
 	if port == "" {
 		port = "8080"
 	}
+	secret := os.Getenv("JWT_SECRETE")
 	
 	return &Config{
 		DbURL: dbUrl,
 		Port:  port,
+		JwtSecret: secret,
 	}, nil
 }

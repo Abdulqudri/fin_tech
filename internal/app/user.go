@@ -11,7 +11,7 @@ func (a *App) MountUser(rg *gin.RouterGroup) {
 	user_repo := gormrepo.NewRepository(a.DB)
 	wallet_repo := gormrepo.NewWalletRepository(a.DB)
 
-	service := useruc.NewService(user_repo, wallet_repo)
+	service := useruc.NewService(user_repo, wallet_repo, a.DB)
 	handler := userhd.NewHandler(service)
  	userhd.Mount(rg, handler)
 }

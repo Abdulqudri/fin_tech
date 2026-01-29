@@ -17,8 +17,8 @@ type UserService struct {
 	db *gorm.DB
 }
 
-func NewService(user_repo userdomain.UserRepository, waller_repo wallet.WalletRepository) *UserService {
-	return &UserService{user_repo: user_repo, waller_repo: waller_repo}
+func NewService(user_repo userdomain.UserRepository, waller_repo wallet.WalletRepository, db *gorm.DB) *UserService {
+	return &UserService{user_repo: user_repo, waller_repo: waller_repo, db: db}
 }
 func (s *UserService) CreateUser(ctx context.Context, u *userdomain.User, password string) error {
 	tx, err := db.BeginTx(ctx, s.db)

@@ -23,5 +23,6 @@ func (a *App) BuildHTTPServer() *gin.Engine {
 	api := r.Group("/api/v1")
 	a.MountUser(api)
 	a.MountWallet(api)
+	a.MountAuth(api)
 	return r
 }
