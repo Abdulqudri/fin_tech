@@ -10,13 +10,18 @@ import (
 	"github.com/google/uuid"
 )
 
+var (
+	ErrInvalidRefreshToken = errors.New("invalid or expired refresh token")
+)
+
 type AuthService struct {
 	user_repo authdomain.AuthRepository
 	refresh_repo authdomain.RefreshTokenRepository
+	refreshExpiry time.Duration
 }
 
-func NewService(repo authdomain.AuthRepository) *AuthService {
-	return &AuthService{user_repo: repo}
+func NewService(repo authdomain.AuthRepository, refreshExpiry time.Duration) *AuthService {
+	return &AuthService{user_repo: repo, refreshExpiry: refreshExpiry}
 }
 
 func (s *AuthService) Login(ctx context.Context, email string, pass string) (*authdomain.Session, error) {
@@ -40,7 +45,7 @@ func (s *AuthService) IssueRefreshToken(
 	token := &authdomain.RefreshToken{
 		ID:        uuid.New(),
 		UserID:    userID,
-		ExpiresAt: time.Now().Add(30 * 24 * time.Hour),
+		ExpiresAt: time.Now().Add(s.refreshExpiry),
 	}
 
 	if err := s.refresh_repo.Save(ctx, token); err != nil {
@@ -48,4 +53,30 @@ func (s *AuthService) IssueRefreshToken(
 	}
 
 	return token, nil
+}
+
+func (s *AuthService) Refresh(ctx context.Context, refreshTokenID uuid.UUID) (string, *authdomain.RefreshToken, error) {
+	token, err := s.refresh_repo.Find(ctx, refreshTokenID)
+	if err != nil {
+		return "", nil, ErrInvalidRefreshToken
+	}
+	if time.Now().After(token.ExpiresAt) {
+		_ = s.refresh_repo.Delete(ctx, refreshTokenID)
+		return "", nil, ErrInvalidRefreshToken
+	}
+
+	//give new token and delete old one
+	if err := s.refresh_repo.Delete(ctx, refreshTokenID); err != nil {
+		return "", nil, err
+	}
+	newRefreshToken, err := s.IssueRefreshToken(ctx, token.UserID)
+	if err != nil {
+		return "", nil, err
+	}
+	return token.UserID.String(), newRefreshToken, nil
+
+}
+
+func (s *AuthService) RevokeRefreshToken(ctx context.Context, refreshTokenID uuid.UUID) error {
+	return s.refresh_repo.Delete(ctx, refreshTokenID)
 }

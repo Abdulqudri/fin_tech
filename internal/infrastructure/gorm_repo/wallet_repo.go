@@ -21,20 +21,20 @@ func NewWalletRepository(db *gorm.DB) *WalletRepository {
 func (r *WalletRepository) Create(ctx context.Context, w *wallet.Wallet) error {
 
 	model := models.Wallet{
-		ID: w.ID,
-		UserID: w.UserID,
+		ID:       w.ID,
+		UserID:   w.UserID,
 		Currency: w.Currency,
-		Status: string(wallet.StatusActive),
+		Status:   string(wallet.StatusActive),
 	}
 	return r.db.WithContext(ctx).Create(&model).Error
 }
 
 func (r *WalletRepository) CreateTx(ctx context.Context, tx db.Tx, w *wallet.Wallet) error {
 	model := models.Wallet{
-		ID: w.ID,
-		UserID: w.UserID,
+		ID:       w.ID,
+		UserID:   w.UserID,
 		Currency: w.Currency,
-		Status: string(wallet.StatusActive),
+		Status:   string(wallet.StatusActive),
 	}
 	return tx.DB().WithContext(ctx).Create(&model).Error
 }
@@ -46,7 +46,7 @@ func (r *WalletRepository) GetById(ctx context.Context, id uuid.UUID) (*wallet.W
 	}
 	return &wallet.Wallet{
 		ID:       model.ID,
-		UserID: model.UserID,
+		UserID:   model.UserID,
 		Currency: model.Currency,
 		Status:   wallet.Status(model.Status),
 	}, nil

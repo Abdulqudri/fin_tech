@@ -40,5 +40,5 @@ func (r *RefreshTokenRepository) Find(ctx context.Context, id uuid.UUID) (*auth.
 	return &refresh_token, nil
 }
 func (r *RefreshTokenRepository) Delete(ctx context.Context, id uuid.UUID) error {
-	return r.db.WithContext(ctx).Delete(&models.RefreshToken{}, "id = ?", id).Error
+	return r.db.WithContext(ctx).Where("id = ?", id).Delete(&models.RefreshToken{}).Error
 }

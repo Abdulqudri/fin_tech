@@ -11,8 +11,8 @@ import (
 
 func (a *App) MountAuth(rg *gin.RouterGroup) {
 	auth_repo := gormrepo.NewAuthRepository(a.DB)
-	service := authuc.NewService(auth_repo)
-	jwt := security.NewJWTIssuer(a.Config.JwtSecret)
+	service := authuc.NewService(auth_repo, a.Config.RefreshExpiry)
+	jwt := security.NewJWTIssuer(a.Config.JwtSecret, a.Config.JwtExpiry)
 	handler := authhd.NewHandler(service, jwt)
 	authhd.Mount(rg, handler)
 }
