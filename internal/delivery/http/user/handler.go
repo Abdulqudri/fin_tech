@@ -4,6 +4,7 @@ import (
 	"github.com/Abdulqudri/fintech/internal/domain/user"
 	useruc "github.com/Abdulqudri/fintech/internal/usecase/user"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -41,4 +42,26 @@ func (h *Handler) GetByEmail(c *gin.Context) {
 		return
 	}
 	c.JSON(200, user)
+}
+
+func (h *Handler) GetById(c *gin.Context) {
+	ctx := c.Request.Context()
+	stingId := c.Param("id")
+	id := uuid.MustParse(stingId)
+	user, err := h.service.GetById(ctx, id)
+	if err != nil {
+		c.JSON(404, gin.H{"error": "User not found"})
+		return
+	}
+	c.JSON(200, user)
+}
+
+func (h *Handler) GetAllUser(c *gin.Context) {
+	ctx := c.Request.Context()
+	users, err := h.service.GetAll(ctx)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to retrieve users"})
+		return
+	}
+	c.JSON(200, users)
 }

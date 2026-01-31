@@ -15,7 +15,7 @@ func New(dsn string) *gorm.DB {
 		log.Default(),
 		logger.Config{
 			SlowThreshold:             200 * time.Millisecond,
-			LogLevel:                  logger.Info,
+			LogLevel:                  logger.Warn,
 			IgnoreRecordNotFoundError: true,
 			Colorful:                  true,
 		},

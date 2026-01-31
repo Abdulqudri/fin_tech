@@ -70,3 +70,19 @@ func (r *UserRepository) GetById(ctx context.Context, id uuid.UUID) (*user.User,
 	}, nil
 }
 
+func (r *UserRepository) GetAll(ctx context.Context) ([]*user.User, error) {
+	var models []models.User
+	if err := r.db.WithContext(ctx).Find(&models).Error; err != nil {
+		return nil, err
+	}
+	users := make([]*user.User, len(models))
+	for i, model := range models {
+		users[i] = &user.User{
+			ID:       model.ID,
+			FullName: model.FullName,
+			Email:    model.Email,
+			Status:   user.Status(model.Status),
+		}
+	}
+	return users, nil
+}

@@ -32,23 +32,19 @@ func (s *UserService) CreateUser(ctx context.Context, u *userdomain.User, passwo
         }
     }()
 
-	user := userdomain.User{
-		ID: uuid.New(),
-		FullName: u.FullName,
-		Email:    u.Email,
-		Status:   userdomain.StatusActive,		
-	}
+	u.ID = uuid.New()
+	u.Status = userdomain.StatusActive
 	hashedPassword, err := pass.Hash(password)
 	if err != nil {
 		return err
 	}
 
-	if err := s.user_repo.CreateTx(ctx, tx, &user, hashedPassword); err != nil {
+	if err := s.user_repo.CreateTx(ctx, tx, u, hashedPassword); err != nil {
 		return err
 	}
 	wallet := wallet.Wallet{
 		ID: uuid.New(),
-		UserID:   user.ID,
+		UserID:   u.ID,
 		Currency: "NGN",
 		Status:   wallet.StatusActive,
 	}
@@ -73,4 +69,9 @@ func (s *UserService) GetById(ctx context.Context, id uuid.UUID) (*userdomain.Us
 	user, err := s.user_repo.GetById(ctx, id)
 	return user, err
 
+}
+
+func (s *UserService) GetAll(ctx context.Context) ([]*userdomain.User, error) {
+	users, err := s.user_repo.GetAll(ctx)
+	return users, err
 }
